@@ -1,1 +1,1 @@
-export const BACKEND_URL ="https://nodelern-2.onrender.com/"
+export const BACKEND_URL ="https://nodelern-2.onrender.com/api/v1"
