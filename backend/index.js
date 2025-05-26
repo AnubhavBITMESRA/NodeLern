@@ -14,6 +14,14 @@ dotenv.config();
 
 const app = express();
 
+// Normalize origins by removing trailing slash
+const allowedOrigins = [
+  process.env.FRONTEND_URL_DEV?.replace(/\/$/, ""),
+  process.env.FRONTEND_URL_PROD?.replace(/\/$/, ""),
+];
+
+console.log("✅ Allowed Origins:", allowedOrigins);
+
 // Debug: Log incoming origin for troubleshooting CORS
 app.use((req, res, next) => {
   console.log("🛰️ Incoming request origin:", req.headers.origin);
@@ -30,22 +38,16 @@ app.use(
   })
 );
 
-// Allowed Origins
-const allowedOrigins = [
-  process.env.FRONTEND_URL_DEV,
-  process.env.FRONTEND_URL_PROD,
-];
-
-// CORS Middleware - UPDATED
+// CORS Middleware with improved origin handling
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) {
-        // Allow requests with no origin (like Postman or server-to-server)
-        return callback(null, true);
-      }
-      if (allowedOrigins.includes(origin)) {
-        // Allow the origin and send it back to enable credentials
+      // For non-browser requests like Postman or server-to-server calls
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, "");
+
+      if (allowedOrigins.includes(normalizedOrigin)) {
         return callback(null, origin);
       } else {
         console.error("❌ CORS BLOCKED Origin:", origin);
