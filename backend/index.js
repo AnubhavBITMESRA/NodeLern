@@ -36,15 +36,20 @@ const allowedOrigins = [
   process.env.FRONTEND_URL_PROD,
 ];
 
-// CORS Middleware
+// CORS Middleware - UPDATED
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+      if (!origin) {
+        // Allow requests with no origin (like Postman or server-to-server)
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        // Allow the origin and send it back to enable credentials
+        return callback(null, origin);
       } else {
         console.error("❌ CORS BLOCKED Origin:", origin);
-        callback(new Error("Not allowed by CORS"));
+        return callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
